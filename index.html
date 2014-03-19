@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>JSZip example : the File API: Timing</title>
+</head>
+
+<body>
+    <h1><a href="../">JSZip</a> example : reading a local file with the File API</h1>
+    <h2>Choose the local(s) zip file(s)</h2>
+    <p class="note">Note : your browser will process the zip file, don't choose a file too big !</p>
+    <form action="index_submit" method="get" accept-charset="utf-8">
+      <input type="file" id="file" name="file" multiple />
+    </form>
+    <h2>Content :</h2>
+    <div id="result"></div>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="jszip.js"></script>
+    <script type="text/javascript">
+    (function() {
+        if (!window.FileReader || !window.ArrayBuffer) {
+            alert("You will need a recent browser to use this demo :(");
+            return;
+        }
+
+
+        var $result = $("#result");
+        $("#file").on("change", function(evt) {
+            // remove content
+            $result.html("");
+
+            // see http://www.html5rocks.com/en/tutorials/file/dndfiles/
+
+            var files = evt.target.files;
+            for (var i = 0, f; f = files[i]; i++) {
+
+                var reader = new FileReader();
+
+                // Closure to capture the file information.
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        try {
+                            console.time("Unzip timer");
+                            // read the content of the file with JSZip
+                            var zip = new JSZip(e.target.result);
+                            console.timeEnd("Unzip timer");
+
+                            // that, or a good ol' for(var entryName in zip.files)
+                            console.time("asText timer");
+                            $.each(zip.files, function(index, zipEntry) {
+
+                                var txt = zipEntry.asText();
+                            });
+                            console.timeEnd("asText timer");
+                        } catch (e) {
+
+                        }
+                    }
+                })(f);
+                // read the file !
+                // readAsArrayBuffer and readAsBinaryString both produce valid content for JSZip.
+                reader.readAsArrayBuffer(f);
+                // reader.readAsBinaryString(f);
+            }
+        });
+    })();
+    </script>
+</body>
+
+</html>
